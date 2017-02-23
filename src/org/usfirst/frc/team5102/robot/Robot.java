@@ -2,7 +2,6 @@
 package org.usfirst.frc.team5102.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -18,6 +17,12 @@ public class Robot extends IterativeRobot {
     final String customAuto = "My Auto";
     String autoSelected;
     SendableChooser chooser;
+    
+    
+    public Drive drive;
+    public Shooter shooter;
+    public Climber climber;
+    public Goblet goblet;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -28,6 +33,11 @@ public class Robot extends IterativeRobot {
         chooser.addDefault("Default Auto", defaultAuto);
         chooser.addObject("My Auto", customAuto);
         SmartDashboard.putData("Auto choices", chooser);
+        
+        drive = new Drive();
+        shooter = new Shooter();
+        climber = new Climber();
+        goblet = new Goblet();
     }
     
 	/**
@@ -63,8 +73,12 @@ public class Robot extends IterativeRobot {
     /**
      * This function is called periodically during operator control
      */
-    public void teleopPeriodic() {
-        
+    public void teleopPeriodic()
+    {
+        drive.teleop();
+        shooter.teleop();
+        climber.teleop();
+        goblet.teleop();
     }
     
     /**
