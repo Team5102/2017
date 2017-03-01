@@ -1,6 +1,7 @@
 package org.usfirst.frc.team5102.robot;
 
 import org.usfirst.frc.team5102.robot.util.RobotMap;
+import org.usfirst.frc.team5102.robot.util.Vision;
 
 import com.ctre.CANTalon;
 
@@ -59,7 +60,7 @@ public class Shooter extends RobotElement
 			shooterMotor.set(0);
 		}
 		
-		System.out.println(shooterMotor.getEncVelocity());
+		//System.out.println(shooterMotor.getEncVelocity());
 		
 		if(controller.getButtonB())
 		{
@@ -69,5 +70,7 @@ public class Shooter extends RobotElement
 		{
 			trigger.set(false);
 		}
+		
+		System.out.println(Vision.getTarget(Vision.Target.Balls, Vision.Axis.X));
 	}
 }
