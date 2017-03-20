@@ -1,5 +1,7 @@
 package org.usfirst.frc.team5102.robot;
 
+import org.usfirst.frc.team5102.robot.util.RobotMap;
+
 import edu.wpi.first.wpilibj.Solenoid;
 
 public class Goblet extends RobotElement
@@ -10,7 +12,7 @@ public class Goblet extends RobotElement
 	{
 		super(1);
 		
-		gobletSolenoid = new Solenoid(1);
+		gobletSolenoid = new Solenoid(RobotMap.gobletSolenoid);
 	}
 	
 	public void teleop()

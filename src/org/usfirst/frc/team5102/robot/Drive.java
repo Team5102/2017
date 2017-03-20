@@ -52,6 +52,8 @@ public class Drive extends RobotElement
 					shifter.shiftGears(Shifter.Gear.high);
 					System.out.println("high gear");
 				}
+				
+				System.out.println(rightDriveMotor1.get());
 		
 	}
 }

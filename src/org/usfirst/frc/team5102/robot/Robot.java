@@ -1,6 +1,8 @@
 
 package org.usfirst.frc.team5102.robot;
 
+import org.usfirst.frc.team5102.robot.util.ArduinoComm;
+import org.usfirst.frc.team5102.robot.util.ArduinoComm.RobotMode;
 import org.usfirst.frc.team5102.robot.util.Vision;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -25,6 +27,8 @@ public class Robot extends IterativeRobot {
     public Shooter shooter;
     public Climber climber;
     public Goblet goblet;
+    
+    private ArduinoComm arduinoComm;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -42,6 +46,8 @@ public class Robot extends IterativeRobot {
         goblet = new Goblet();
         
         Vision.init();
+        
+        arduinoComm = new ArduinoComm(2);
     }
     
 	/**
@@ -57,6 +63,8 @@ public class Robot extends IterativeRobot {
     	autoSelected = (String) chooser.getSelected();
 //		autoSelected = SmartDashboard.getString("Auto Selector", defaultAuto);
 		System.out.println("Auto selected: " + autoSelected);
+		
+		arduinoComm.setMode(RobotMode.auton);
     }
 
     /**
@@ -72,22 +80,43 @@ public class Robot extends IterativeRobot {
     	//Put default auto code here
             break;
     	}
+    	
+    	
+    	arduinoComm.updateAirMeter(drive.shifter.getWorkingPSI());
     }
 
     /**
      * This function is called periodically during operator control
      */
+    public void teleopInit()
+    {
+    	arduinoComm.setMode(RobotMode.teleop);
+    }
+    
     public void teleopPeriodic()
     {
         drive.teleop();
         shooter.teleop();
         climber.teleop();
         goblet.teleop();
+        
+        arduinoComm.updateAirMeter(drive.shifter.getWorkingPSI());
     }
     
     /**
      * This function is called periodically during test mode
      */
+    
+    public void disabledInit()
+    {
+    	arduinoComm.setMode(RobotMode.disabled);
+    }
+    
+    public void disabledPeriodic()
+    {
+    	arduinoComm.updateAirMeter(drive.shifter.getWorkingPSI());
+    }
+    
     public void testPeriodic() {
     
     }

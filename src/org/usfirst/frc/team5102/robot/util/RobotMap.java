@@ -11,10 +11,17 @@ public interface RobotMap
 	
 	//Shooter
 	public static final int shooterMotor = 13;
+	public static final int shooterMotor2 = 7;
 	
 	//====================Pneumatics====================
 	//Shifter
 	public static final int shifterSolenoid = 0;
+	
+	//Goblet
+	public static final int gobletSolenoid = 1;
+	
+	//Shooter
+	public static final int shooterTriggerSolenoid = 3;
 	
 	//====================I/O====================
 	//Pneumatics

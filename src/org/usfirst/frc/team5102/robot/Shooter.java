@@ -1,16 +1,20 @@
 package org.usfirst.frc.team5102.robot;
 
+import org.usfirst.frc.team5102.robot.util.CustomTimer;
 import org.usfirst.frc.team5102.robot.util.RobotMap;
-import org.usfirst.frc.team5102.robot.util.Vision;
 
 import com.ctre.CANTalon;
+import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Timer;
 
 public class Shooter extends RobotElement
 {
-	CANTalon shooterMotor;
+	CANTalon shooterMotor, shooterMotor2;
 	Solenoid trigger;
+	
+	CustomTimer timer;
 	
 	Shooter()
 	{
@@ -18,7 +22,11 @@ public class Shooter extends RobotElement
 		
 		shooterMotor = new CANTalon(RobotMap.shooterMotor);
 		
-		trigger = new Solenoid(3);
+		shooterMotor2 = new CANTalon(RobotMap.shooterMotor2);
+		shooterMotor2.changeControlMode(TalonControlMode.Follower);
+		shooterMotor2.set(shooterMotor.getDeviceID());
+		
+		trigger = new Solenoid(RobotMap.shooterTriggerSolenoid);
 		
 		/*
 		shooterMotor.setFeedbackDevice(FeedbackDevice.CtreMagEncoder_Relative);
@@ -39,12 +47,16 @@ public class Shooter extends RobotElement
 		//shooterMotor.setSetpoint(4);
 		 */
 		shooterMotor.setSafetyEnabled(false);
+		
+		timer = new CustomTimer();
 	}
 	
 	
 	
 	public void teleop()
 	{
+		timer.update();
+		
 		//shooterMotor.changeControlMode(TalonControlMode.Speed);
 		//shooterMotor.set(4);
 		//shooterMotor.enableControl();
@@ -64,13 +76,37 @@ public class Shooter extends RobotElement
 		
 		if(controller.getButtonB())
 		{
-			trigger.set(true);
+			if(!timer.isRunning())
+			{
+				toggleTrigger();
+				
+				timer.waitFor(.5);
+			}
+			
+			
 		}
 		else
 		{
 			trigger.set(false);
 		}
 		
-		System.out.println(Vision.getTarget(Vision.Target.Balls, Vision.Axis.X));
+		//System.out.println(Vision.getTarget(Vision.Target.Balls, Vision.Axis.X));
+	}
+	
+	public void toggleTrigger()
+	{
+		if(trigger.get())
+		{
+			trigger.set(false);
+		}
+		else
+		{
+			trigger.set(true);
+		}
+	}
+	
+	public void autonomous()
+	{
+		timer.update();
 	}
 }

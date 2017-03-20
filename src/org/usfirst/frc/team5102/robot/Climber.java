@@ -21,11 +21,13 @@ public class Climber extends RobotElement
 			climbMotor1.set(1);
 			climbMotor2.set(1);
 		}
+		/*
 		else if(controller.getButtonX())
 		{
 			climbMotor1.set(-1);
 			climbMotor2.set(-1);
 		}
+		*/
 		else
 		{
 			climbMotor1.set(0);
