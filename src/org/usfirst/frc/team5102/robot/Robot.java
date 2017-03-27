@@ -4,7 +4,10 @@ package org.usfirst.frc.team5102.robot;
 import org.usfirst.frc.team5102.robot.util.ArduinoComm;
 import org.usfirst.frc.team5102.robot.util.ArduinoComm.RobotMode;
 import org.usfirst.frc.team5102.robot.util.Vision;
+import org.usfirst.frc.team5102.robot.util.Vision.Axis;
 
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,9 +19,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends IterativeRobot {
-    final String defaultAuto = "Default";
-    final String customAuto = "My Auto";
+public class Robot extends IterativeRobot
+{
+    
     String autoSelected;
     SendableChooser chooser;
     
@@ -27,6 +30,7 @@ public class Robot extends IterativeRobot {
     public Shooter shooter;
     public Climber climber;
     public Goblet goblet;
+    public Autonomous auton;
     
     private ArduinoComm arduinoComm;
 	
@@ -36,18 +40,29 @@ public class Robot extends IterativeRobot {
      */
     public void robotInit() {
         chooser = new SendableChooser();
-        chooser.addDefault("Default Auto", defaultAuto);
-        chooser.addObject("My Auto", customAuto);
-        SmartDashboard.putData("Auto choices", chooser);
+        chooser.addDefault("No Auton", "No Auton");
+        chooser.addObject("Place Gear", "Place Gear");
+        chooser.addObject("Drive Forward", "Drive Forward");
+        chooser.addObject("Shoot Balls", "Shoot Balls");
+        SmartDashboard.putData("Autonomous Selector", chooser);
+        
+        //SmartDashboard.putNumber("Test", 12345);
         
         drive = new Drive();
         shooter = new Shooter();
         climber = new Climber();
         goblet = new Goblet();
+        auton = new Autonomous();
         
         Vision.init();
         
         arduinoComm = new ArduinoComm(2);
+        
+        UsbCamera gobletCam = CameraServer.getInstance().startAutomaticCapture(0);
+        gobletCam.setFPS(10);
+        
+        UsbCamera climberCam = CameraServer.getInstance().startAutomaticCapture(1);
+        climberCam.setFPS(10);
     }
     
 	/**
@@ -65,21 +80,29 @@ public class Robot extends IterativeRobot {
 		System.out.println("Auto selected: " + autoSelected);
 		
 		arduinoComm.setMode(RobotMode.auton);
+		
+		shooter.shooterLEDRing.set(true);
+		
+		switch(autoSelected)
+		{
+    		case "No Auton":
+    			break;
+    		case "Place Gear":
+    			auton.placeGear();
+    			break;
+    		case "Drive Forward":
+    			auton.driveForward();
+    			break;
+    		case "Shoot Balls":
+    			auton.shootBalls();
+    			break;
+    	}
     }
 
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-    	switch(autoSelected) {
-    	case customAuto:
-        //Put custom auto code here   
-            break;
-    	case defaultAuto:
-    	default:
-    	//Put default auto code here
-            break;
-    	}
     	
     	
     	arduinoComm.updateAirMeter(drive.shifter.getWorkingPSI());
@@ -91,6 +114,10 @@ public class Robot extends IterativeRobot {
     public void teleopInit()
     {
     	arduinoComm.setMode(RobotMode.teleop);
+    	
+    	drive.gyro.reset();
+    	
+    	shooter.shooterLEDRing.set(true);
     }
     
     public void teleopPeriodic()
@@ -101,6 +128,8 @@ public class Robot extends IterativeRobot {
         goblet.teleop();
         
         arduinoComm.updateAirMeter(drive.shifter.getWorkingPSI());
+        
+        System.out.println(Vision.getTargetBalls(Axis.X) + "  -  " + Vision.getTargetBalls(Axis.Y));
     }
     
     /**
@@ -110,11 +139,23 @@ public class Robot extends IterativeRobot {
     public void disabledInit()
     {
     	arduinoComm.setMode(RobotMode.disabled);
+    	
+    	shooter.reset();
+    	
+    	shooter.shooterLEDRing.set(false);
+    	
+    	if(Drive.aim != null)
+    	{
+    		Drive.aim.interrupt();
+    	}
+    	
     }
     
     public void disabledPeriodic()
     {
     	arduinoComm.updateAirMeter(drive.shifter.getWorkingPSI());
+    	
+    	//System.out.println(climber.controller.getPOV());
     }
     
     public void testPeriodic() {

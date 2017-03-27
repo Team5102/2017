@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 
 public class Goblet extends RobotElement
 {
-	Solenoid gobletSolenoid;
+	static Solenoid gobletSolenoid;
 	
 	Goblet()
 	{

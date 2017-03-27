@@ -12,6 +12,11 @@ public interface RobotMap
 	//Shooter
 	public static final int shooterMotor = 13;
 	public static final int shooterMotor2 = 7;
+	public static final int intakeMotor = 8;
+	
+	//Climber
+	public static final int climbMotor1 = 5;
+	public static final int climbMotor2 = 6;
 	
 	//====================Pneumatics====================
 	//Shifter
@@ -22,6 +27,9 @@ public interface RobotMap
 	
 	//Shooter
 	public static final int shooterTriggerSolenoid = 3;
+	
+	//Climber
+	public static final int climberExtend = 2;
 	
 	//====================I/O====================
 	//Pneumatics

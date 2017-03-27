@@ -24,57 +24,83 @@ public class Vision
 		targetBalls = NetworkTable.getTable("GRIP/targetBalls");
 	}
 	
-	public static double getTarget(Target target, Axis axis)
+	public static double getTargetBalls(Axis axis)
 	{
-		if(target == Target.Gears)
+		double[] targetsX = targetBalls.getNumberArray("centerX", new double[0]);
+		double[] targetsY = targetBalls.getNumberArray("centerY", new double[0]);
+		
+		if(targetsX.length == 2)
 		{
-			
-		}
-		else if(target == Target.Balls)
-		{
-			double[] targetsX = targetBalls.getNumberArray("centerX", new double[0]);
-			double[] targetsY = targetBalls.getNumberArray("centerY", new double[0]);
-			
-			if(targetsX.length == 2)
+			if(targetsY[0] > targetsY[1])
 			{
-				if(targetsY[0] > targetsY[1])
+				if(axis == Axis.X)
 				{
-					if(axis == Axis.X)
-					{
-						return targetsX[0];
-					}
-					else if(axis == Axis.Y)
-					{
-						return targetsY[0];
-					}
+					return targetsX[0];
 				}
-				else
+				else if(axis == Axis.Y)
 				{
-					if(axis == Axis.X)
-					{
-						return targetsX[1];
-					}
-					else if(axis == Axis.Y)
-					{
-						return targetsY[1];
-					}
+					return targetsY[0];
+				}
+			}
+			else
+			{
+				if(axis == Axis.X)
+				{
+					return targetsX[1];
+				}
+				else if(axis == Axis.Y)
+				{
+					return targetsY[1];
 				}
 			}
 		}
+		
 		return 0;
 	}
 	
-	/*
-	public static boolean targetFound()
+	public static double getTargetGears(Axis axis)
 	{
-		double[] targets = grip.getNumberArray("centerX", new double[0]);
+		double[] targetsX = targetGears.getNumberArray("centerX", new double[0]);
+		double[] targetsY = targetGears.getNumberArray("centerY", new double[0]);
 		
-		if(targets.length > 0)
-        {
-			return true;
-        }
+		if(targetsX.length == 2)
+		{
+			switch(axis)
+			{
+				case X:
+					return ((targetsX[0]+targetsX[1])/2);
+					
+				case Y:
+					return ((targetsY[0]+targetsY[1])/2);
+			}
+		}
+		
+		return 0;
+	}
+	
+	
+	public static boolean targetFound(Target target)
+	{
+		switch(target)
+		{
+			case Balls:
+				if(getTargetBalls(Axis.X) > 0)
+				{
+					return true;
+				}
+				break;
+				
+			case Gears:
+				if(getTargetGears(Axis.X) > 0)
+				{
+					return true;
+				}
+				break;
+		}
+		
 		return false;
 	}
+	/*
 	
 	public static int getLargest()
 	{
