@@ -2,9 +2,10 @@ package org.usfirst.frc.team5102.robot.util;
 
 import edu.wpi.first.wpilibj.Joystick;
 
-public class ArduinoComm
+public class DriverStation
 {
-	Joystick launchpad;
+	
+	public static Joystick launchpad;
 	
 	public enum RobotMode
 	{
@@ -13,92 +14,152 @@ public class ArduinoComm
 		disabled
 	}
 	
-	public ArduinoComm(int port)
+	public enum InfoStripMode
 	{
-		launchpad = new Joystick(port);
+		airPressure,
+		info
 	}
 	
-	public void updateAirMeter(double PSI)
-    {
-    	if(PSI > 54)
+	boolean modeOverride;
+		
+	public DriverStation(int launchpadPort)
+	{
+		launchpad = new Joystick(launchpadPort);
+		
+		modeOverride = false;
+	}
+	
+	public void setInfoStrip(double number, InfoStripMode mode)
+	{
+		if(mode == InfoStripMode.airPressure && !modeOverride)
+		{
+			launchpad.setOutput(6, false);
+			
+			if(number > 54)
+	    	{
+	    		number = 10;
+	    	}
+	    	else if(number > 48)
+	    	{
+	    		number = 9;
+	    	}
+	    	else if(number > 42)
+	    	{
+	    		number = 8;
+	    	}
+	    	else if(number > 36)
+	    	{
+	    		number = 7;
+	    	}
+	    	else if(number > 30)
+	    	{
+	    		number = 6;
+	    	}
+	    	else if(number > 24)
+	    	{
+	    		number = 5;
+	    	}
+	    	else if(number > 18)
+	    	{
+	    		number = 4;
+	    	}
+	    	else if(number > 12)
+	    	{
+	    		number = 3;
+	    	}
+	    	else if(number > 6)
+	    	{
+	    		number = 2;
+	    	}
+	    	else// if(PSI > 0)
+	    	{
+	    		number = 1;
+	    	}
+		}
+		else if(mode == InfoStripMode.info)
+		{
+			launchpad.setOutput(6, true);
+		}
+	
+		
+		if(number == 10)
     	{
     		launchpad.setOutput(1, false);
     		launchpad.setOutput(2, true);
     		launchpad.setOutput(3, true);
     		launchpad.setOutput(4, false);
     	}
-    	else if(PSI > 48)
+    	else if(number == 9)
     	{
     		launchpad.setOutput(1, true);
     		launchpad.setOutput(2, false);
     		launchpad.setOutput(3, false);
     		launchpad.setOutput(4, true);
     	}
-    	else if(PSI > 42)
+    	else if(number == 8)
     	{
     		launchpad.setOutput(1, true);
     		launchpad.setOutput(2, false);
     		launchpad.setOutput(3, false);
     		launchpad.setOutput(4, false);
     	}
-    	else if(PSI > 36)
+    	else if(number == 7)
     	{
     		launchpad.setOutput(1, true);
     		launchpad.setOutput(2, true);
     		launchpad.setOutput(3, false);
     		launchpad.setOutput(4, false);
     	}
-    	else if(PSI > 30)
+    	else if(number == 6)
     	{
     		launchpad.setOutput(1, true);
     		launchpad.setOutput(2, true);
     		launchpad.setOutput(3, true);
     		launchpad.setOutput(4, false);
     	}
-    	else if(PSI > 24)
+    	else if(number == 5)
     	{
     		launchpad.setOutput(1, true);
     		launchpad.setOutput(2, true);
     		launchpad.setOutput(3, true);
     		launchpad.setOutput(4, true);
     	}
-    	else if(PSI > 18)
+    	else if(number == 4)
     	{
     		launchpad.setOutput(1, false);
     		launchpad.setOutput(2, true);
     		launchpad.setOutput(3, true);
     		launchpad.setOutput(4, true);
     	}
-    	else if(PSI > 12)
+    	else if(number == 3)
     	{
     		launchpad.setOutput(1, false);
     		launchpad.setOutput(2, false);
     		launchpad.setOutput(3, true);
     		launchpad.setOutput(4, true);
     	}
-    	else if(PSI > 6)
+    	else if(number == 2)
     	{
     		launchpad.setOutput(1, false);
     		launchpad.setOutput(2, false);
     		launchpad.setOutput(3, false);
     		launchpad.setOutput(4, true);
     	}
-    	else// if(PSI > 0)
+    	else if(number == 1)
     	{
     		launchpad.setOutput(1, false);
     		launchpad.setOutput(2, true);
     		launchpad.setOutput(3, false);
     		launchpad.setOutput(4, true);
     	}
-    	/*else
+    	else
     	{
     		launchpad.setOutput(1, false);
     		launchpad.setOutput(2, false);
     		launchpad.setOutput(3, false);
     		launchpad.setOutput(4, false);
     	}
-    	*/
-    }
+	}
 	
 	public void setMode(RobotMode mode)
 	{

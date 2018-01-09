@@ -2,13 +2,13 @@ package org.usfirst.frc.team5102.robot;
 
 import org.usfirst.frc.team5102.robot.util.RobotMap;
 
-import com.ctre.CANTalon;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Solenoid;
 
 public class Climber extends RobotElement
 {
-	CANTalon climbMotor1, climbMotor2;
+	WPI_TalonSRX climbMotor1, climbMotor2;
 	
 	Solenoid climberExtend;
 	
@@ -16,8 +16,8 @@ public class Climber extends RobotElement
 	{
 		super(1);
 		
-		climbMotor1 = new CANTalon(RobotMap.climbMotor1);
-		climbMotor2 = new CANTalon(RobotMap.climbMotor2);
+		climbMotor1 = new WPI_TalonSRX(RobotMap.climbMotor1);
+		climbMotor2 = new WPI_TalonSRX(RobotMap.climbMotor2);
 		
 		climbMotor1.setSafetyEnabled(false);
 		climbMotor2.setSafetyEnabled(false);

@@ -1,17 +1,17 @@
 package org.usfirst.frc.team5102.robot;
 
 import org.usfirst.frc.team5102.robot.util.CustomTimer;
+import org.usfirst.frc.team5102.robot.util.LaunchPadPot;
 import org.usfirst.frc.team5102.robot.util.RobotMap;
 import org.usfirst.frc.team5102.robot.util.Toggle;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.TalonControlMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Solenoid;
 
 public class Shooter extends RobotElement
 {
-	CANTalon shooterMotor, shooterMotor2, intakeMotor;
+	WPI_TalonSRX shooterMotor, shooterMotor2, intakeMotor;
 	Solenoid trigger;
 	
 	CustomTimer timer;
@@ -26,15 +26,12 @@ public class Shooter extends RobotElement
 	{
 		super(1);
 		
-		shooterMotor = new CANTalon(RobotMap.shooterMotor);
-		shooterMotor.changeControlMode(TalonControlMode.Voltage);
-		shooterMotor.setVoltageCompensationRampRate(24.0);
+		shooterMotor = new WPI_TalonSRX(RobotMap.shooterMotor);
 		
-		shooterMotor2 = new CANTalon(RobotMap.shooterMotor2);
-		shooterMotor2.changeControlMode(TalonControlMode.Follower);
-		shooterMotor2.set(shooterMotor.getDeviceID());
+		shooterMotor2 = new WPI_TalonSRX(RobotMap.shooterMotor2);
+		shooterMotor2.follow(shooterMotor);
 		
-		intakeMotor = new CANTalon(RobotMap.intakeMotor);
+		intakeMotor = new WPI_TalonSRX(RobotMap.intakeMotor);
 		
 		trigger = new Solenoid(RobotMap.shooterTriggerSolenoid);
 		
@@ -103,7 +100,7 @@ public class Shooter extends RobotElement
 		
 		if(controller.getLeftTriggerAxis() > .5 && !controller.getButtonY())
 		{
-			shooterMotor.set(-8);
+			shooterMotor.set((-((LaunchPadPot.getScaledPot()/2)+6))/12);
 		}
 		else
 		{

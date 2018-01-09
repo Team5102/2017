@@ -27,7 +27,7 @@ public class Shifter extends RobotElement
 		super(0);
 		
 		shifter = new Solenoid(RobotMap.shifterSolenoid);
-		shifter.set(true);
+		shifter.set(false);
 		
 		//storedPressureSensor = new AnalogInput(RobotMap.storedPressureSensor);
 		workingPressureSensor = new AnalogInput(RobotMap.workingPressureSensor);
@@ -44,12 +44,12 @@ public class Shifter extends RobotElement
 	{
 		if(gear == Gear.low)
 		{
-			shifter.set(true);
+			shifter.set(false);
 		}
 		
 		else if(gear == Gear.high)
 		{
-			shifter.set(false);
+			shifter.set(true);
 		}
 	}
 	
@@ -58,11 +58,11 @@ public class Shifter extends RobotElement
 	 */
 	public Gear getCurrentGear()
 	{
-		if(shifter.get())
+		if(!shifter.get())
 		{
 			return Gear.low;
 		}
-		else if(!shifter.get())
+		else if(shifter.get())
 		{
 			return Gear.high;
 		}

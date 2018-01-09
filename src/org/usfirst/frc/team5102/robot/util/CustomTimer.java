@@ -17,6 +17,7 @@ public class CustomTimer
 	
 	public void waitFor(double seconds)
 	{
+		timer.stop();
 		timerRunning = true;
 		timer.start();
 		timeToWait = seconds;

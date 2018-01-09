@@ -1,13 +1,17 @@
 
 package org.usfirst.frc.team5102.robot;
 
-import org.usfirst.frc.team5102.robot.util.ArduinoComm;
-import org.usfirst.frc.team5102.robot.util.ArduinoComm.RobotMode;
+
+import org.usfirst.frc.team5102.robot.util.DriverStation;
+import org.usfirst.frc.team5102.robot.util.DriverStation.InfoStripMode;
+import org.usfirst.frc.team5102.robot.util.DriverStation.RobotMode;
 import org.usfirst.frc.team5102.robot.util.Vision;
 import org.usfirst.frc.team5102.robot.util.Vision.Axis;
 
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,7 +36,11 @@ public class Robot extends IterativeRobot
     public Goblet goblet;
     public Autonomous auton;
     
-    private ArduinoComm arduinoComm;
+    public static DriverStation driverStation;
+    
+    //private ArduinoComm arduinoComm;
+    
+    //DigitalOutput encOut1,encOut2;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -56,14 +64,33 @@ public class Robot extends IterativeRobot
         
         Vision.init();
         
-        arduinoComm = new ArduinoComm(2);
+        driverStation = new DriverStation(2);
+        
+        //arduinoComm = new ArduinoComm(2);
         
         UsbCamera gobletCam = CameraServer.getInstance().startAutomaticCapture(0);
         gobletCam.setFPS(10);
         
         UsbCamera climberCam = CameraServer.getInstance().startAutomaticCapture(1);
         climberCam.setFPS(10);
+        
+        /*
+        encOut1 = new DigitalOutput(6);
+        encOut2 = new DigitalOutput(7);
+        
+        new Thread(() ->
+        {
+        	while(true)
+        	{
+        		encOut1.set(ArduinoComm.launchpad.getRawButton(8));
+            	encOut2.set(ArduinoComm.launchpad.getRawButton(9));
+            	//System.out.println("thread run");
+        	}
+        	
+        }).start();
+        */
     }
+    
     
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select between different autonomous modes
@@ -79,7 +106,7 @@ public class Robot extends IterativeRobot
 //		autoSelected = SmartDashboard.getString("Auto Selector", defaultAuto);
 		System.out.println("Auto selected: " + autoSelected);
 		
-		arduinoComm.setMode(RobotMode.auton);
+		driverStation.setMode(RobotMode.auton);
 		
 		shooter.shooterLEDRing.set(true);
 		
@@ -102,10 +129,10 @@ public class Robot extends IterativeRobot
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic() {
+    public void autonomousPeriodic()
+    {
+    	updateAirMeter();
     	
-    	
-    	arduinoComm.updateAirMeter(drive.shifter.getWorkingPSI());
     }
 
     /**
@@ -113,7 +140,7 @@ public class Robot extends IterativeRobot
      */
     public void teleopInit()
     {
-    	arduinoComm.setMode(RobotMode.teleop);
+    	driverStation.setMode(RobotMode.teleop);
     	
     	drive.gyro.reset();
     	
@@ -127,9 +154,9 @@ public class Robot extends IterativeRobot
         climber.teleop();
         goblet.teleop();
         
-        arduinoComm.updateAirMeter(drive.shifter.getWorkingPSI());
-        
-        System.out.println(Vision.getTargetBalls(Axis.X) + "  -  " + Vision.getTargetBalls(Axis.Y));
+        updateAirMeter();
+                
+        //System.out.println(Vision.getTargetBalls(Axis.X) + "  -  " + Vision.getTargetBalls(Axis.Y));
     }
     
     /**
@@ -138,7 +165,7 @@ public class Robot extends IterativeRobot
     
     public void disabledInit()
     {
-    	arduinoComm.setMode(RobotMode.disabled);
+    	driverStation.setMode(RobotMode.disabled);
     	
     	shooter.reset();
     	
@@ -153,13 +180,39 @@ public class Robot extends IterativeRobot
     
     public void disabledPeriodic()
     {
-    	arduinoComm.updateAirMeter(drive.shifter.getWorkingPSI());
+    	
+    	
+    	//System.out.println(encOut1.get() + "   " + encOut2.get());
+    	
+    	/*
+    	if(drive.controller.getButtonBACK())
+    	{
+    		arduinoComm.stripMode = InfoStripMode.info;
+    	}
+    	else
+    	{
+    		arduinoComm.stripMode = InfoStripMode.airPressure;
+    	}
+    	*/
+    	
+    	
+    	//arduinoComm.getPot();
     	
     	//System.out.println(climber.controller.getPOV());
+    	
+    	updateAirMeter();
+    	
+    	//Drive.driveEncoder.update();
+    	//System.out.println(Drive.driveEncoder.getTicks());
     }
     
     public void testPeriodic() {
     
+    }
+    
+    public void updateAirMeter()
+    {
+    	driverStation.setInfoStrip(drive.shifter.getWorkingPSI(), InfoStripMode.airPressure);
     }
     
 }

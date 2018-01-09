@@ -1,12 +1,18 @@
 package org.usfirst.frc.team5102.robot;
 
+import org.usfirst.frc.team5102.robot.Shifter.Gear;
 import org.usfirst.frc.team5102.robot.util.RobotMap;
 import org.usfirst.frc.team5102.robot.util.Toggle;
+import org.usfirst.frc.team5102.robot.util.TouchlessEncoder;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.TalonControlMode;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
@@ -18,7 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Drive extends RobotElement implements PIDOutput, PIDSource
 {
-	public CANTalon leftDriveMotor1,leftDriveMotor2,rightDriveMotor1,rightDriveMotor2;
+	public WPI_TalonSRX leftDriveMotor1,leftDriveMotor2,rightDriveMotor1,rightDriveMotor2;
 	
 	public static RobotDrive robotDrive;
 	
@@ -32,21 +38,21 @@ public class Drive extends RobotElement implements PIDOutput, PIDSource
 	
 	public static Thread aim;
 	
+	public static TouchlessEncoder driveEncoder;
+		
 	Toggle orientationToggle;
 	
 	Drive() 
 		{
 		super(0);
 		
-		leftDriveMotor1 = new CANTalon(RobotMap.leftDriveMotor1);
-		leftDriveMotor2 = new CANTalon(RobotMap.leftDriveMotor2);
-		rightDriveMotor1 = new CANTalon(RobotMap.rightDriveMotor1);
-		rightDriveMotor2 = new CANTalon(RobotMap.rightDriveMotor2);
+		leftDriveMotor1 = new WPI_TalonSRX(RobotMap.leftDriveMotor1);
+		leftDriveMotor2 = new WPI_TalonSRX(RobotMap.leftDriveMotor2);
+		rightDriveMotor1 = new WPI_TalonSRX(RobotMap.rightDriveMotor1);
+		rightDriveMotor2 = new WPI_TalonSRX(RobotMap.rightDriveMotor2);
 		
-		leftDriveMotor2.changeControlMode(TalonControlMode.Follower);
-		leftDriveMotor2.set(leftDriveMotor1.getDeviceID());
-		rightDriveMotor2.changeControlMode(TalonControlMode.Follower);
-		rightDriveMotor2.set(rightDriveMotor1.getDeviceID());
+		leftDriveMotor2.follow(leftDriveMotor1);
+		rightDriveMotor2.follow(rightDriveMotor1);
 		
 		robotDrive = new RobotDrive(leftDriveMotor1,rightDriveMotor1);
 		
@@ -59,6 +65,8 @@ public class Drive extends RobotElement implements PIDOutput, PIDSource
 		
 		gyro = new AHRS(SPI.Port.kMXP);
 		
+		driveEncoder = new TouchlessEncoder(0);
+		driveEncoder.reset();
 		
 		drivePID = new PIDController(0.05, 0.005, 0.3, this, this);
 		drivePID.setSetpoint(0);
@@ -108,8 +116,100 @@ public class Drive extends RobotElement implements PIDOutput, PIDSource
 		}
 	}
 	
+	public static void driveAuton(int targetTicks, int msPerTick, int direction)
+	{
+		//Drive.gyro.reset();
+		
+		Drive.shifter.shiftGears(Gear.low);
+		/*
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+		
+		drivePID.setPID(0.05, 0.005, 0.3);
+		drivePID.setOutputRange(-0.5, 0.5);
+		
+		if(direction > 0)
+		{
+			Drive.setPIDSpeed(-.40);
+		}
+		else if(direction < 0)
+		{
+			Drive.setPIDSpeed(.40);
+		}
+		
+		//Drive.drivePID.enable();
+		Drive.driveEncoder.reset();
+		
+		//int targetTicks = 200;
+		//int msPerTick = 30;
+		
+		while(driveEncoder.getTicks() < targetTicks)
+		{
+			//System.out.println(Drive.driveEncoder.getTicks());
+			
+			if(targetTicks - driveEncoder.getTicks() < 100-msPerTick)
+			{
+				msPerTick = 70;
+			}
+			
+			if(driveEncoder.getTimePerTick() < msPerTick)
+			{
+				if(pidSpeed < 0)
+				{
+					pidSpeed += 0.001;
+				}
+				else
+				{
+					pidSpeed -= 0.001;
+				}
+				
+			}
+			else if(driveEncoder.getTimePerTick() > msPerTick)
+			{
+				if(pidSpeed < 0)
+				{
+					pidSpeed -= 0.001;
+				}
+				else
+				{
+					pidSpeed += 0.001;
+				}
+			}
+			
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			driveEncoder.update();
+		}
+		//drivePID.disable();
+	}
+	
+	public static void turnTo(double angle)
+	{
+		Drive.drivePID.setPID(0.05, 0.02, 0.2);
+		
+		Drive.drivePID.setOutputRange(-.4, .4);
+		
+		Drive.setPIDSpeed(0);
+		Drive.drivePID.setSetpoint(angle);
+		
+		while(!drivePID.onTarget()){}
+		//Drive.drivePID.enable();
+	}
+	
 	public void teleop()
 	{
+		//System.out.println(enc.get());
+		
 		if(controller.getPOV() > -1)
 		{
 			aim();
@@ -149,7 +249,7 @@ public class Drive extends RobotElement implements PIDOutput, PIDSource
 					System.out.println("high gear");
 				}
 				
-				System.out.println(gyro.getAngle());
+				//System.out.println(gyro.getAngle());
 		
 	}
 
